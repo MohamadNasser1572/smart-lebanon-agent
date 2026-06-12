@@ -110,9 +110,3 @@ User (Web dashboard / WhatsApp)
 | 4 | Red    | Danger | Stay indoors, follow guidance |
 | 5 | Dark red | Critical | Evacuate if instructed |
 
-## Team
-
-- Mohammad Nasser (12330387)
-- Mohammad Sujud
-
-Lebanese International University -- DevLeB AI Agents Hackathon 2026
