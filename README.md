@@ -1,7 +1,7 @@
 # LEIA — Lebanon Emergency Intelligence Agent
 
 AI-powered real-time situational awareness and crisis guidance for Lebanon.
-Built for DevLeB AI Agents Hackathon 2026.
+Built for Develeb AI Agents Hackathon 2026.
 
 ## What it does
 
