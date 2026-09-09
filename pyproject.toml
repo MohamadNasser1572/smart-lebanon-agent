@@ -1,2 +1,16 @@
+[project]
+name = "smart-lebanon-agent"
+version = "1.0.0"
+description = "AI-powered situational awareness and crisis guidance for Lebanon"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+	"anthropic==0.109.1",
+	"fastapi==0.136.3",
+	"uvicorn==0.49.0",
+	"gradio==6.18.0",
+	"python-multipart==0.0.32",
+	"pydantic==2.13.4",
+]
+
 [tool.vercel]
 entrypoint = "api:app"
