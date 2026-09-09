@@ -135,16 +135,42 @@ GROQ_TOOLS = [{"type": "function", "function": {
 
 def run_tool(tool_name: str, tool_input: dict) -> str:
     """Dispatch tool calls to their implementations."""
-    if tool_name == "web_search_news":
-        return web_search_news(tool_input["query"], tool_input.get("region", "all"))
-    elif tool_name == "kb_lookup":
-        return kb_lookup(tool_input["region"], tool_input["info_type"])
-    elif tool_name == "classify_threat":
-        return classify_threat(tool_input["region"], tool_input["news_context"])
-    elif tool_name == "get_emergency_contacts":
-        return get_emergency_contacts(tool_input["service_type"])
-    else:
+    try:
+        if tool_name == "web_search_news":
+            return web_search_news(tool_input["query"], tool_input.get("region", "all"))
+        elif tool_name == "kb_lookup":
+            return kb_lookup(tool_input["region"], tool_input["info_type"])
+        elif tool_name == "classify_threat":
+            return classify_threat(tool_input["region"], tool_input["news_context"])
+        elif tool_name == "get_emergency_contacts":
+            return get_emergency_contacts(tool_input.get("service_type", "all"))
         return json.dumps({"error": f"Unknown tool: {tool_name}"})
+    except Exception as exc:
+        return json.dumps({"error": f"Tool unavailable: {type(exc).__name__}"})
+
+
+def _fallback_response(messages: list[dict]) -> dict:
+    """Return a useful response if Groq rejects a tool request or is unavailable."""
+    try:
+        response = _get_client().chat.completions.create(
+            model=os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
+            max_tokens=400,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT + "\nDo not call tools in this response."},
+                *messages,
+            ],
+        )
+        text = response.choices[0].message.content or ""
+        if text:
+            return {"response": text, "threat_level": None, "tool_calls_made": []}
+    except Exception:
+        pass
+
+    return {
+        "response": "I cannot retrieve the latest information right now. Please call Civil Defense at 125 or the Red Cross at 140.",
+        "threat_level": None,
+        "tool_calls_made": [],
+    }
 
 
 def chat(messages: list[dict], max_tool_rounds: int = 5) -> dict:
@@ -163,12 +189,16 @@ def chat(messages: list[dict], max_tool_rounds: int = 5) -> dict:
     current_messages = messages.copy()
 
     for round_num in range(max_tool_rounds):
-        response = _get_client().chat.completions.create(
-            model=os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
-            max_tokens=1024,
-            tools=GROQ_TOOLS,
-            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + current_messages,
-        )
+        try:
+            response = _get_client().chat.completions.create(
+                model=os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
+                max_tokens=1024,
+                tools=GROQ_TOOLS,
+                tool_choice="auto",
+                messages=[{"role": "system", "content": SYSTEM_PROMPT}] + current_messages,
+            )
+        except Exception:
+            return _fallback_response(current_messages)
 
         message = response.choices[0].message
 
@@ -199,7 +229,10 @@ def chat(messages: list[dict], max_tool_rounds: int = 5) -> dict:
         })
 
         for call in message.tool_calls:
-            tool_input = json.loads(call.function.arguments)
+            try:
+                tool_input = json.loads(call.function.arguments)
+            except (TypeError, json.JSONDecodeError):
+                tool_input = {}
             result = run_tool(call.function.name, tool_input)
             tool_calls_made.append({
                 "name": call.function.name,
