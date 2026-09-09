@@ -177,11 +177,49 @@ def _fallback_response(messages: list[dict]) -> dict:
         except Exception as exc:
             _last_provider_error = type(exc).__name__
 
+    user_text = " ".join(
+        str(message.get("content", ""))
+        for message in messages
+        if message.get("role") == "user"
+    )
+    local_response = _local_response(user_text)
+    if local_response:
+        return {"response": local_response, "threat_level": None, "tool_calls_made": []}
+
     return {
         "response": "I cannot retrieve the latest information right now. Please call Civil Defense at 125 or the Red Cross at 140.",
         "threat_level": None,
         "tool_calls_made": [],
     }
+
+
+def _local_response(user_text: str) -> str:
+    """Provide useful local-KB guidance when the remote model is unavailable."""
+    text = user_text.lower()
+    region = next((name for name in (
+        "beirut", "mount_lebanon", "north_lebanon", "south_lebanon", "bekaa"
+    ) if name in text), None)
+    if "tripoli" in text:
+        region = "north_lebanon"
+    if "sidon" in text or "tyre" in text or "nabatieh" in text:
+        region = "south_lebanon"
+    if not region:
+        return ""
+
+    info_type = "hospitals" if any(word in text for word in ("hospital", "medical", "مستشفى")) else "all"
+    data = json.loads(kb_lookup(region, info_type))
+    label = data.get("region", region.replace("_", " ").title())
+    lines = [f"Local guidance for {label}:"]
+    if data.get("hospitals"):
+        lines.append("Nearest listed hospitals: " + "; ".join(
+            hospital.get("name", "Unknown hospital") for hospital in data["hospitals"][:3]
+        ))
+    if data.get("shelters"):
+        lines.append("Shelters: " + "; ".join(
+            shelter.get("name", "Listed shelter") for shelter in data["shelters"][:3]
+        ))
+    lines.append("For current emergency instructions, call Civil Defense at 125 or Red Cross at 140.")
+    return "\n\n".join(lines)
 
 
 def chat(messages: list[dict], max_tool_rounds: int = 5) -> dict:

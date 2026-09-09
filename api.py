@@ -17,6 +17,7 @@ from fastapi.responses import PlainTextResponse, JSONResponse
 from pydantic import BaseModel
 
 from agent.agent import chat, create_user_message, create_assistant_message
+import agent.agent as agent_module
 
 app = FastAPI(
     title="Lebanon Emergency Agent API",
@@ -159,6 +160,7 @@ async def health():
         "active_sessions": len(_sessions),
         "groq_key_set": bool(os.environ.get("GROQ_API_KEY")),
         "groq_model": os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant"),
+        "last_provider_error": agent_module._last_provider_error,
     }
 
 
