@@ -1,0 +1,158 @@
+{
+  "emergency_contacts": {
+    "civil_defense": "125",
+    "red_cross_lebanon": "140",
+    "ambulance": "140",
+    "police": "112",
+    "fire": "175",
+    "internal_security": "1717",
+    "unhcr_lebanon": "+961-1-850-178",
+    "ocha_lebanon": "+961-1-978-600",
+    "lebanese_army": "1680",
+    "ministry_health_hotline": "1214"
+  },
+  "regions": {
+    "beirut": {
+      "name": "Beirut",
+      "districts": ["Ashrafieh", "Hamra", "Verdun", "Mar Mikhael", "Gemmayzeh", "Badaro", "Ras Beirut", "Ain el-Mreisseh", "Bourj Hammoud"],
+      "hospitals": [
+        {"name": "American University of Beirut Medical Center (AUBMC)", "phone": "+961-1-350000", "address": "Hamra, Beirut", "level": "tertiary", "trauma": true},
+        {"name": "Hotel Dieu de France Hospital", "phone": "+961-1-615300", "address": "Achrafieh, Beirut", "level": "tertiary", "trauma": true},
+        {"name": "St. George Hospital", "phone": "+961-1-585700", "address": "Achrafieh, Beirut", "level": "secondary", "trauma": true},
+        {"name": "Makassed General Hospital", "phone": "+961-1-636000", "address": "Tarik el-Jadidah, Beirut", "level": "secondary", "trauma": false},
+        {"name": "Rafik Hariri University Hospital", "phone": "+961-1-851000", "address": "Bir Hassan, Beirut", "level": "tertiary", "trauma": true}
+      ],
+      "shelters": [
+        {"name": "UNESCO Palace", "address": "Hamra, Beirut", "capacity": 500, "type": "civic"},
+        {"name": "Sanayeh Garden Shelter", "address": "Sanayeh, Beirut", "capacity": 200, "type": "public"},
+        {"name": "Municipality of Beirut Emergency Center", "address": "Downtown Beirut", "capacity": 300, "type": "official"}
+      ],
+      "evacuation_routes": [
+        "Beirut Ring Road → Antelias (North)",
+        "Damascus Highway → Chtaura (East)",
+        "Airport Road → Damour (South)",
+        "Charles Helou → Jdeideh (Northeast)"
+      ],
+      "safe_zones": ["Achrafieh heights", "Hamra central", "Verdun corridor"]
+    },
+    "mount_lebanon": {
+      "name": "Mount Lebanon",
+      "districts": ["Metn", "Kesrouan", "Chouf", "Aley", "Baabda", "Jbeil"],
+      "hospitals": [
+        {"name": "Lebanese American University Medical Center", "phone": "+961-9-955555", "address": "Byblos, Jbeil", "level": "tertiary", "trauma": true},
+        {"name": "Middle East Institute of Health", "phone": "+961-4-874444", "address": "Bsalim, Metn", "level": "secondary", "trauma": false},
+        {"name": "Baabda Government Hospital", "phone": "+961-5-922000", "address": "Baabda", "level": "secondary", "trauma": true}
+      ],
+      "shelters": [
+        {"name": "Baabda Municipality Shelter", "address": "Baabda Center", "capacity": 400, "type": "official"},
+        {"name": "Broummana Community Center", "address": "Broummana", "capacity": 150, "type": "community"},
+        {"name": "Chouf Cedar Reserve Station", "address": "Barouk", "capacity": 100, "type": "nature"}
+      ],
+      "evacuation_routes": [
+        "Mountain Road → Faraya (North interior)",
+        "Jdeideh Highway → Antelias coast",
+        "Aley Road → Beirut Ring Road"
+      ],
+      "safe_zones": ["Kesrouan highlands", "Metn interior", "Jbeil coastal strip"]
+    },
+    "north_lebanon": {
+      "name": "North Lebanon",
+      "districts": ["Tripoli", "Zgharta", "Bcharre", "Koura", "Minieh-Danniyeh", "Akkar"],
+      "hospitals": [
+        {"name": "Tripoli Government Hospital", "phone": "+961-6-628000", "address": "Tripoli", "level": "tertiary", "trauma": true},
+        {"name": "Islamic Hospital of Tripoli", "phone": "+961-6-442000", "address": "Tripoli", "level": "secondary", "trauma": false},
+        {"name": "Notre Dame des Secours Hospital", "phone": "+961-6-920400", "address": "Bcharre", "level": "secondary", "trauma": false}
+      ],
+      "shelters": [
+        {"name": "Tripoli Municipal Stadium", "address": "Tripoli", "capacity": 1000, "type": "civic"},
+        {"name": "Rachid Karami International Fair", "address": "Tripoli", "capacity": 800, "type": "civic"},
+        {"name": "Akkar Emergency Coordination Center", "address": "Halba, Akkar", "capacity": 300, "type": "official"}
+      ],
+      "evacuation_routes": [
+        "Coastal Highway → Syria border (Northeast)",
+        "Tripoli → Bcharre mountain road",
+        "North Highway → Beirut (South)"
+      ],
+      "safe_zones": ["Bcharre highlands", "Koura valley", "Tripoli port area"]
+    },
+    "south_lebanon": {
+      "name": "South Lebanon",
+      "districts": ["Sidon", "Tyre", "Nabatieh", "Marjayoun", "Hasbaya", "Bint Jbeil"],
+      "hospitals": [
+        {"name": "Sidon Government Hospital", "phone": "+961-7-720555", "address": "Sidon", "level": "secondary", "trauma": true},
+        {"name": "Hammoud University Hospital", "phone": "+961-7-723888", "address": "Sidon", "level": "tertiary", "trauma": true},
+        {"name": "Tyre National Hospital", "phone": "+961-7-344000", "address": "Tyre", "level": "secondary", "trauma": true}
+      ],
+      "shelters": [
+        {"name": "Sidon Municipality Emergency Center", "address": "Sidon", "capacity": 500, "type": "official"},
+        {"name": "UNIFIL Base - Public Shelter", "address": "Naqoura", "capacity": 200, "type": "international"},
+        {"name": "Tyre Rest House Grounds", "address": "Tyre", "capacity": 300, "type": "civic"}
+      ],
+      "evacuation_routes": [
+        "Coastal Road → Sidon → Beirut (North)",
+        "Nabatieh → Chouf mountain road",
+        "Tyre → Sidon Highway"
+      ],
+      "safe_zones": ["Sidon coastal zone", "Jezzine highlands"]
+    },
+    "bekaa": {
+      "name": "Bekaa Valley",
+      "districts": ["Zahle", "West Bekaa", "Baalbek", "Hermel", "Rachaya"],
+      "hospitals": [
+        {"name": "Elias Hraoui Government Hospital", "phone": "+961-8-800000", "address": "Zahle", "level": "tertiary", "trauma": true},
+        {"name": "Baalbek Government Hospital", "phone": "+961-8-370260", "address": "Baalbek", "level": "secondary", "trauma": true},
+        {"name": "Taalabaya Governmental Hospital", "phone": "+961-8-540000", "address": "Taalabaya", "level": "secondary", "trauma": false}
+      ],
+      "shelters": [
+        {"name": "Zahle Municipality Center", "address": "Zahle", "capacity": 600, "type": "official"},
+        {"name": "Chtaura Community Hall", "address": "Chtaura", "capacity": 250, "type": "community"},
+        {"name": "Baalbek Roman Temple Grounds", "address": "Baalbek", "capacity": 400, "type": "civic"}
+      ],
+      "evacuation_routes": [
+        "Damascus Highway → Beirut (West)",
+        "Zahle → Chtoura → Masnaa border (East to Syria)",
+        "Bekaa North Road → Hermel → Homs (Syria)"
+      ],
+      "safe_zones": ["Zahle city center", "Chtaura junction area"]
+    }
+  },
+  "ngos_and_aid": [
+    {"name": "Lebanese Red Cross", "phone": "140", "services": ["ambulance", "blood", "shelter", "food"], "website": "redcross.org.lb"},
+    {"name": "UNHCR Lebanon", "phone": "+961-1-850178", "services": ["refugee_support", "legal_aid", "shelter"], "website": "unhcr.org/lb"},
+    {"name": "UNICEF Lebanon", "phone": "+961-1-981301", "services": ["child_protection", "water", "health"], "website": "unicef.org/lebanon"},
+    {"name": "WFP Lebanon", "phone": "+961-1-971340", "services": ["food_assistance", "cash_assistance"], "website": "wfp.org/countries/lebanon"},
+    {"name": "MSF Lebanon", "phone": "+961-1-746391", "services": ["emergency_medical", "mental_health"], "website": "msf.org"},
+    {"name": "IRC Lebanon", "phone": "+961-1-791870", "services": ["protection", "health", "education"], "website": "rescue.org/country/lebanon"},
+    {"name": "Arcenciel", "phone": "+961-1-385625", "services": ["disability_support", "rehabilitation"], "website": "arcenciel.org"},
+    {"name": "ACTED Lebanon", "phone": "+961-1-374555", "services": ["shelter", "food", "water_sanitation"], "website": "acted.org"}
+  ],
+  "threat_classifications": {
+    "safe": {"level": 1, "color": "green", "description": "No active threats. Normal precautions apply."},
+    "monitor": {"level": 2, "color": "yellow", "description": "Elevated situation. Stay alert, monitor news."},
+    "caution": {"level": 3, "color": "orange", "description": "Active incident in area. Avoid non-essential travel."},
+    "danger": {"level": 4, "color": "red", "description": "Immediate danger. Follow evacuation guidance."},
+    "critical": {"level": 5, "color": "darkred", "description": "Life-threatening emergency. Evacuate immediately if instructed."}
+  },
+  "general_safety_tips": {
+    "shelter_in_place": [
+      "Move to an interior room away from windows",
+      "Stay low if explosions or gunfire nearby",
+      "Keep mobile phone charged",
+      "Fill bathtubs and containers with water",
+      "Keep documents (ID, passport) accessible"
+    ],
+    "evacuation": [
+      "Take ID documents, cash, medications",
+      "Charge all devices before leaving",
+      "Inform someone of your route and destination",
+      "Follow official Civil Defense guidance",
+      "Avoid main highways during mass evacuation — use alternate roads"
+    ],
+    "communication": [
+      "SMS works when calls fail — use SMS",
+      "WhatsApp works over wifi if mobile network is down",
+      "Tune to Lebanese Army Radio or NBN for official updates",
+      "Register with your embassy if foreign national"
+    ]
+  }
+}

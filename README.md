@@ -1,5 +1,7 @@
 # LEIA — Lebanon Emergency Intelligence Agent
 
+[![Tests](https://github.com/MohamadNasser1572/smart-lebanon-agent/actions/workflows/tests.yml/badge.svg)](https://github.com/MohamadNasser1572/smart-lebanon-agent/actions/workflows/tests.yml)
+
 AI-powered real-time situational awareness and crisis guidance for Lebanon.
 Built for Develeb AI Agents Hackathon 2026.
 
