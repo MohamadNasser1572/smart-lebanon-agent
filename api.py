@@ -52,6 +52,19 @@ class ChatResponse(BaseModel):
     session_length: int
 
 
+# API landing page
+
+@app.get("/", include_in_schema=False)
+async def root():
+    return {
+        "name": "LEIA - Lebanon Emergency Intelligence Agent",
+        "status": "online",
+        "docs": "/docs",
+        "health": "/health",
+        "chat_endpoint": "/chat",
+    }
+
+
 # ── REST endpoint ─────────────────────────────────────────────────────────────
 
 @app.post("/chat", response_model=ChatResponse)
