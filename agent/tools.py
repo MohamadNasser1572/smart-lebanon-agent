@@ -1,6 +1,6 @@
 """
 Tool implementations for the Lebanon Emergency Agent.
-Each function maps to one tool Claude can call.
+Each function maps to one tool Groq can call.
 """
 
 import json
@@ -8,21 +8,24 @@ import os
 import re
 from pathlib import Path
 from datetime import datetime
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+import xml.etree.ElementTree as ET
 
-import anthropic
+from groq import Groq
 
 # ── Load the knowledge base once at import time ──────────────────────────────
 _KB_PATH = Path(__file__).parent.parent / "data" / "lebanon_kb.json"
 with open(_KB_PATH, "r", encoding="utf-8") as f:
     KB = json.load(f)
 
-# Lazy client — instantiated on first use so import works without the env var
-_client: anthropic.Anthropic | None = None
+# Lazy client - instantiated on first use so import works without the env var
+_client: Groq | None = None
 
-def _get_client() -> anthropic.Anthropic:
+def _get_client() -> Groq:
     global _client
     if _client is None:
-        _client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        _client = Groq(api_key=os.environ["GROQ_API_KEY"])
     return _client
 
 
@@ -30,7 +33,7 @@ def _get_client() -> anthropic.Anthropic:
 
 def web_search_news(query: str, region: str = "all") -> str:
     """
-    Search for live Lebanon news using the Anthropic web search tool.
+    Search for live Lebanon news using Google News RSS.
     Returns a JSON string with headlines and summaries.
     """
     region_hint = ""
@@ -44,53 +47,36 @@ def web_search_news(query: str, region: str = "all") -> str:
         }
         region_hint = f" {region_map.get(region, '')}"
 
-    full_query = f"{query}{region_hint} site:lorientlejour.com OR site:naharnet.com OR site:lbci.com OR site:mtv.com.lb"
+    full_query = f"{query}{region_hint} Lebanon"
 
     try:
-        response = _get_client().messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=600,
-            tools=[{"type": "web_search_20250305", "name": "web_search"}],
-            messages=[{
-                "role": "user",
-                "content": f"""Search for this query and return a JSON object with this exact structure:
-{{
-  "timestamp": "<ISO timestamp>",
-  "query": "<query used>",
-  "results": [
-    {{"headline": "...", "source": "...", "summary": "...", "url": "..."}}
-  ],
-  "overall_summary": "2-3 sentence summary of the current situation"
-}}
-
-Query: {full_query}
-
-Return ONLY the JSON, no other text."""
-            }],
-        )
-
-        # Extract text from response
-        text = ""
-        for block in response.content:
-            if hasattr(block, "text"):
-                text += block.text
-
-        # Try to parse as JSON, fallback to wrapping raw text
-        text = text.strip()
-        json_match = re.search(r'\{.*\}', text, re.DOTALL)
-        if json_match:
-            return json_match.group(0)
-
+        rss_url = "https://news.google.com/rss/search?q=" + quote(full_query)
+        request = Request(rss_url, headers={"User-Agent": "LEIA/1.0"})
+        with urlopen(request, timeout=8) as response:
+            root = ET.fromstring(response.read())
+        results = []
+        for item in root.findall("./channel/item")[:8]:
+            title = item.findtext("title", "").strip()
+            source = item.findtext("source", "Lebanon news").strip()
+            link = item.findtext("link", "").strip()
+            published = item.findtext("pubDate", "").strip()
+            results.append({
+                "headline": title,
+                "source": source,
+                "summary": title,
+                "url": link,
+                "published": published,
+            })
         return json.dumps({
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.utcnow().isoformat() + "Z",
             "query": query,
-            "results": [],
-            "overall_summary": text[:500] if text else "No results found.",
+            "results": results,
+            "overall_summary": " ".join(item["headline"] for item in results[:3]) or "No recent results found.",
         })
 
     except Exception as e:
         return json.dumps({
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.utcnow().isoformat() + "Z",
             "query": query,
             "results": [],
             "overall_summary": f"Search unavailable: {str(e)}. Check Civil Defense at 125 for updates.",
@@ -214,15 +200,12 @@ Respond with ONLY a JSON object:
 Levels:
 1=safe, 2=monitor (stay alert), 3=caution (avoid travel), 4=danger (incident active), 5=critical (evacuate)"""
 
-            response = _get_client().messages.create(
-                model="claude-haiku-4-5-20251001",
+            response = _get_client().chat.completions.create(
+                model=os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
                 max_tokens=200,
                 messages=[{"role": "user", "content": prompt}],
             )
-            text = ""
-            for block in response.content:
-                if hasattr(block, "text"):
-                    text += block.text
+            text = response.choices[0].message.content or ""
 
             json_match = re.search(r'\{.*\}', text.strip(), re.DOTALL)
             if json_match:

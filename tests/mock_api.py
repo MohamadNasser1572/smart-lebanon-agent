@@ -1,5 +1,5 @@
 """
-Mock Claude responses for offline testing (no API key needed).
+Mock Groq responses for offline testing (no API key needed).
 Used by test_system.py in default mode.
 """
 

@@ -157,7 +157,7 @@ async def health():
     return {
         "status": "ok",
         "active_sessions": len(_sessions),
-        "anthropic_key_set": bool(os.environ.get("ANTHROPIC_API_KEY")),
+        "groq_key_set": bool(os.environ.get("GROQ_API_KEY")),
     }
 
 

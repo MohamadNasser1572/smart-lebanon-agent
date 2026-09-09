@@ -2,8 +2,8 @@
 LEIA — Full system integration test
 
 Usage:
-    python test_system.py          → offline mode using mock Claude responses
-    python test_system.py --live   → uses real Claude API (needs ANTHROPIC_API_KEY)
+    python test_system.py          → offline mode using mock Groq responses
+    python test_system.py --live   → uses real Groq API (needs GROQ_API_KEY)
 """
 
 import os, sys, json, time, unittest.mock
@@ -30,7 +30,7 @@ def check(label, cond, detail=""):
 hdr("Layer 1 -- Knowledge base & local tools")
 # -----------------------------------------------------------------------------
 if not LIVE:
-    os.environ.setdefault("ANTHROPIC_API_KEY", "sk-test-placeholder")
+    os.environ.setdefault("GROQ_API_KEY", "gsk-test-placeholder")
 
 from agent.tools import kb_lookup, classify_threat, get_emergency_contacts
 
@@ -209,8 +209,8 @@ if failed == 0:
     print(f"{G}{BOLD}  All {passed} tests passed.{END}")
     if not LIVE:
         print(f"\n  This was an OFFLINE run using mock responses.")
-        print(f"  To test against the real Claude API:")
-        print(f"    export ANTHROPIC_API_KEY=sk-ant-...")
+        print(f"  To test against the real Groq API:")
+        print(f"    export GROQ_API_KEY=gsk-...")
         print(f"    python test_system.py --live\n")
     print(f"  To launch the dashboard:  python run.py")
     print(f"  To launch the API server: python run.py api\n")

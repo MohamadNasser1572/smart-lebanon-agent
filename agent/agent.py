@@ -1,13 +1,13 @@
 """
 Lebanon Emergency Intelligence Agent
-Core orchestrator — routes user messages through tools and Claude API.
+Core orchestrator - routes user messages through tools and Groq.
 """
 
 import json
 import os
 import re
 from typing import Optional
-import anthropic
+from groq import Groq
 from .tools import (
     web_search_news,
     kb_lookup,
@@ -15,12 +15,12 @@ from .tools import (
     get_emergency_contacts,
 )
 
-_client: "anthropic.Anthropic | None" = None
+_client: Groq | None = None
 
 def _get_client():
     global _client
     if _client is None:
-        _client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        _client = Groq(api_key=os.environ["GROQ_API_KEY"])
     return _client
 
 SYSTEM_PROMPT = """You are LEIA — Lebanon Emergency Intelligence Agent.
@@ -126,6 +126,12 @@ TOOLS = [
     }
 ]
 
+GROQ_TOOLS = [{"type": "function", "function": {
+    "name": tool["name"],
+    "description": tool["description"],
+    "parameters": tool["input_schema"],
+}} for tool in TOOLS]
+
 
 def run_tool(tool_name: str, tool_input: dict) -> str:
     """Dispatch tool calls to their implementations."""
@@ -144,10 +150,10 @@ def run_tool(tool_name: str, tool_input: dict) -> str:
 def chat(messages: list[dict], max_tool_rounds: int = 5) -> dict:
     """
     Main agentic loop.
-    Sends messages to Claude, handles tool calls, returns final response.
+    Sends messages to Groq, handles tool calls, returns final response.
 
     Args:
-        messages: Conversation history in Anthropic format
+        messages: Conversation history in OpenAI-compatible format
         max_tool_rounds: Safety limit on tool call iterations
 
     Returns:
@@ -157,46 +163,54 @@ def chat(messages: list[dict], max_tool_rounds: int = 5) -> dict:
     current_messages = messages.copy()
 
     for round_num in range(max_tool_rounds):
-        response = _get_client().messages.create(
-            model="claude-opus-4-5",
+        response = _get_client().chat.completions.create(
+            model=os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
             max_tokens=1024,
-            system=SYSTEM_PROMPT,
-            tools=TOOLS,
-            messages=current_messages,
+            tools=GROQ_TOOLS,
+            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + current_messages,
         )
 
-        # If Claude is done (no more tool calls), return the final text
-        if response.stop_reason == "end_turn":
-            final_text = ""
-            for block in response.content:
-                if hasattr(block, "text"):
-                    final_text += block.text
+        message = response.choices[0].message
+
+        # If Groq is done (no more tool calls), return the final text.
+        if not message.tool_calls:
             threat_level = _extract_threat_level(tool_calls_made)
             return {
-                "response": final_text,
+                "response": message.content or "",
                 "threat_level": threat_level,
                 "tool_calls_made": tool_calls_made,
             }
 
-        # Handle tool use
-        if response.stop_reason == "tool_use":
-            # Add Claude's response (with tool_use blocks) to history
-            current_messages.append({"role": "assistant", "content": response.content})
+        # Add the assistant tool-call message in OpenAI-compatible format.
+        current_messages.append({
+            "role": "assistant",
+            "content": message.content,
+            "tool_calls": [
+                {
+                    "id": call.id,
+                    "type": "function",
+                    "function": {
+                        "name": call.function.name,
+                        "arguments": call.function.arguments,
+                    },
+                }
+                for call in message.tool_calls
+            ],
+        })
 
-            # Execute each tool call
-            tool_results = []
-            for block in response.content:
-                if block.type == "tool_use":
-                    tool_calls_made.append({"name": block.name, "input": block.input})
-                    result = run_tool(block.name, block.input)
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": result,
-                    })
-
-            # Add tool results to history
-            current_messages.append({"role": "user", "content": tool_results})
+        for call in message.tool_calls:
+            tool_input = json.loads(call.function.arguments)
+            result = run_tool(call.function.name, tool_input)
+            tool_calls_made.append({
+                "name": call.function.name,
+                "input": tool_input,
+                "result": result,
+            })
+            current_messages.append({
+                "role": "tool",
+                "tool_call_id": call.id,
+                "content": result,
+            })
 
     # Fallback if we hit max rounds
     return {

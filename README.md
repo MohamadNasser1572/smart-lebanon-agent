@@ -23,23 +23,24 @@ Built for Develeb AI Agents Hackathon 2026.
 pip install -r requirements.txt
 ```
 
-### 2. Set your Anthropic API key
+### 2. Set your Groq API key
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-your-key-here
+export GROQ_API_KEY=gsk-your-key-here
 ```
-Windows PowerShell: `$env:ANTHROPIC_API_KEY="sk-ant-your-key-here"`
+
+Windows PowerShell: `$env:GROQ_API_KEY="gsk-your-key-here"`
 
 (`.env.example` is included -- copy to `.env` and fill in if you prefer)
 
 ### 3. Run it
 
-| Command | What it does | URL |
-|---|---|---|
-| `python run.py` | **Web dashboard** (the demo) | http://127.0.0.1:7860 |
-| `python run.py api` | REST API + WhatsApp webhook | http://127.0.0.1:8000/docs |
-| `python run.py test` | Offline test suite (no key needed) | terminal |
-| `python run.py test-live` | Full test against real Claude API | terminal |
+| Command                   | What it does                       | URL                        |
+| ------------------------- | ---------------------------------- | -------------------------- |
+| `python run.py`           | **Web dashboard** (the demo)       | http://127.0.0.1:7860      |
+| `python run.py api`       | REST API + WhatsApp webhook        | http://127.0.0.1:8000/docs |
+| `python run.py test`      | Offline test suite (no key needed) | terminal                   |
+| `python run.py test-live` | Full test against real Groq API    | terminal                   |
 
 **For the hackathon demo, just run `python run.py`** -- opens a chat dashboard
 with a live threat-level badge, example queries, and emergency numbers panel.
@@ -57,7 +58,7 @@ smart-lebanon-agent/
 ├── .env.example
 ├── agent/
 │   ├── __init__.py
-│   ├── agent.py        <- Orchestrator + Claude tool-calling loop
+│   ├── agent.py        <- Orchestrator + Groq tool-calling loop
 │   └── tools.py         <- Tool implementations
 ├── data/
 │   └── lebanon_kb.json <- Knowledge base: hospitals, shelters, contacts, routes
@@ -75,7 +76,7 @@ smart-lebanon-agent/
 cd smart-lebanon-agent
 pip install -r requirements.txt
 python test_system.py          # "All 64 tests passed" -- offline, no key needed
-export ANTHROPIC_API_KEY=sk-ant-...
+export GROQ_API_KEY=gsk-...
 python run.py                  # opens the dashboard
 ```
 
@@ -96,7 +97,7 @@ User (Web dashboard / WhatsApp)
         |
    Agent orchestrator (agent/agent.py)
         |
-   Claude (tool-calling loop)
+     Groq (tool-calling loop)
         |
    web_search_news | kb_lookup | classify_threat | get_emergency_contacts
    (live news)     | (static KB)| (LLM+keywords)  | (NGO/emergency numbers)
@@ -104,11 +105,10 @@ User (Web dashboard / WhatsApp)
 
 ## Threat levels
 
-| Level | Color | Meaning | Action |
-|-------|-------|---------|--------|
-| 1 | Green  | Safe | Normal precautions |
-| 2 | Yellow | Monitor | Stay alert, watch news |
-| 3 | Orange | Caution | Avoid non-essential travel |
-| 4 | Red    | Danger | Stay indoors, follow guidance |
-| 5 | Dark red | Critical | Evacuate if instructed |
-
+| Level | Color    | Meaning  | Action                        |
+| ----- | -------- | -------- | ----------------------------- |
+| 1     | Green    | Safe     | Normal precautions            |
+| 2     | Yellow   | Monitor  | Stay alert, watch news        |
+| 3     | Orange   | Caution  | Avoid non-essential travel    |
+| 4     | Red      | Danger   | Stay indoors, follow guidance |
+| 5     | Dark red | Critical | Evacuate if instructed        |

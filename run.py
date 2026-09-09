@@ -7,10 +7,10 @@ Usage:
     python run.py            → launches the web dashboard (http://127.0.0.1:7860)
     python run.py api        → launches the FastAPI backend (http://127.0.0.1:8000)
     python run.py test       → runs the offline test suite (no API key required)
-    python run.py test-live  → runs the test suite using the real Claude API
+    python run.py test-live  → runs the test suite using the real Groq API
 
 Before running, set your API key:
-    export ANTHROPIC_API_KEY=sk-ant-...
+    export GROQ_API_KEY=gsk-...
 (or copy .env.example to .env and fill it in, then `export $(cat .env | xargs)`)
 """
 
@@ -22,9 +22,9 @@ sys.path.insert(0, ROOT)
 
 
 def check_api_key():
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        print("\n⚠️  ANTHROPIC_API_KEY is not set.")
-        print("   export ANTHROPIC_API_KEY=sk-ant-your-key-here\n")
+    if not os.environ.get("GROQ_API_KEY"):
+        print("\nGROQ_API_KEY is not set.")
+        print("   export GROQ_API_KEY=gsk-your-key-here\n")
         sys.exit(1)
 
 
