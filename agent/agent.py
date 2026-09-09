@@ -16,6 +16,15 @@ from .tools import (
 )
 
 _client: Groq | None = None
+_last_provider_error: str | None = None
+
+
+def _model_candidates() -> list[str]:
+    configured = os.environ.get("GROQ_MODEL")
+    return [configured] if configured else [
+        "llama-3.1-8b-instant",
+        "llama-3.3-70b-versatile",
+    ]
 
 def _get_client():
     global _client
@@ -151,20 +160,22 @@ def run_tool(tool_name: str, tool_input: dict) -> str:
 
 def _fallback_response(messages: list[dict]) -> dict:
     """Return a useful response if Groq rejects a tool request or is unavailable."""
-    try:
-        response = _get_client().chat.completions.create(
-            model=os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
-            max_tokens=400,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT + "\nDo not call tools in this response."},
-                *messages,
-            ],
-        )
-        text = response.choices[0].message.content or ""
-        if text:
-            return {"response": text, "threat_level": None, "tool_calls_made": []}
-    except Exception:
-        pass
+    global _last_provider_error
+    for model in _model_candidates():
+        try:
+            response = _get_client().chat.completions.create(
+                model=model,
+                max_tokens=400,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT + "\nDo not call tools in this response."},
+                    *messages,
+                ],
+            )
+            text = response.choices[0].message.content or ""
+            if text:
+                return {"response": text, "threat_level": None, "tool_calls_made": []}
+        except Exception as exc:
+            _last_provider_error = type(exc).__name__
 
     return {
         "response": "I cannot retrieve the latest information right now. Please call Civil Defense at 125 or the Red Cross at 140.",
@@ -188,16 +199,22 @@ def chat(messages: list[dict], max_tool_rounds: int = 5) -> dict:
     tool_calls_made = []
     current_messages = messages.copy()
 
+    global _last_provider_error
     for round_num in range(max_tool_rounds):
-        try:
-            response = _get_client().chat.completions.create(
-                model=os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
-                max_tokens=1024,
-                tools=GROQ_TOOLS,
-                tool_choice="auto",
-                messages=[{"role": "system", "content": SYSTEM_PROMPT}] + current_messages,
-            )
-        except Exception:
+        response = None
+        for model in _model_candidates():
+            try:
+                response = _get_client().chat.completions.create(
+                    model=model,
+                    max_tokens=1024,
+                    tools=GROQ_TOOLS,
+                    tool_choice="auto",
+                    messages=[{"role": "system", "content": SYSTEM_PROMPT}] + current_messages,
+                )
+                break
+            except Exception as exc:
+                _last_provider_error = type(exc).__name__
+        if response is None:
             return _fallback_response(current_messages)
 
         message = response.choices[0].message

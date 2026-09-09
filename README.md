@@ -31,6 +31,8 @@ export GROQ_API_KEY=gsk-your-key-here
 
 Windows PowerShell: `$env:GROQ_API_KEY="gsk-your-key-here"`
 
+Optional model override: `GROQ_MODEL=llama-3.1-8b-instant`
+
 (`.env.example` is included -- copy to `.env` and fill in if you prefer)
 
 ### 3. Run it

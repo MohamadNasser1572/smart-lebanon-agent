@@ -22,6 +22,10 @@ with open(_KB_PATH, "r", encoding="utf-8") as f:
 # Lazy client - instantiated on first use so import works without the env var
 _client: Groq | None = None
 
+
+def _groq_model() -> str:
+    return os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
+
 def _get_client() -> Groq:
     global _client
     if _client is None:
@@ -201,7 +205,7 @@ Levels:
 1=safe, 2=monitor (stay alert), 3=caution (avoid travel), 4=danger (incident active), 5=critical (evacuate)"""
 
             response = _get_client().chat.completions.create(
-                model=os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
+                model=_groq_model(),
                 max_tokens=200,
                 messages=[{"role": "user", "content": prompt}],
             )
