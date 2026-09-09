@@ -24,7 +24,7 @@ _client: Groq | None = None
 
 
 def _groq_model() -> str:
-    return os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
+    return os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
 
 def _get_client() -> Groq:
     global _client

@@ -22,7 +22,7 @@ _last_provider_error: str | None = None
 def _model_candidates() -> list[str]:
     configured = os.environ.get("GROQ_MODEL")
     return [configured] if configured else [
-        "llama-3.1-8b-instant",
+        "openai/gpt-oss-20b",
         "llama-3.3-70b-versatile",
     ]
 
